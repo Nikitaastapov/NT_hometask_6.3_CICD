@@ -1,0 +1,165 @@
+Настройка сервера
+
+1. подключаемся
+ssh root@80.78.241.219
+2. создаем пользователя
+root@80.78.241.219:~# adduser nikita
+3. задаем пароль и заполняем инфо
+4. Назначаем пользователя идмином
+root@80.78.241.219:~# usermod nikita -aG sudo
+5.переключаемся на пользователя
+root@80.78.241.219:~# su nikita
+6. Переходим в основную директорию
+nikita@80-78-241-219:/root$ cd ~
+7. скачиваем проект с github
+nnikita@80-78-241-219:~$ git clone https://github.com/Nikitaastapov/NT_hometask_dj_5.6.git
+8.обновляем установщик
+nikita@89-108-115-185:~$ sudo apt update
+9. устанавливаем окружение, pip, postgress
+nikita@89-108-115-185:~$ sudo apt install python3-venv python3-pip postgresql
+10.устанавливаем nginx
+nikita@89-108-115-185:~$ sudo apt install nginx
+11.устанавливаем expect
+nikita@89-108-115-185:~$ sudo apt install expect
+12. Переходим на пользователя postgres (указан в базе данных)
+nikita@89-108-115-185:~$ sudo su postgres
+13. переходим на psql
+postgres@89-108-115-185:/home/nikita$ psql
+13.1 используем текущего пользователя
+postgres=# ALTER USER nikita WITH PASSWORD 'nikita';
+14. создаем БД crud
+postgres=# CREATE DATABASE netology_stocks_products;
+15. Возвращаемся к проекту:
+postgres=# \q
+postgres@89-108-115-185:/home/nikita$ exit
+exit
+nikita@89-108-115-185:~$ 
+16. переходим в папку проекта
+nikita@89-108-115-185:~$ cd NT_hometask_dj_5.6
+17.создаем доп. ветку на git (необязатеьно)в проекте
+git checkout -b cicd
+18. отправляем изменения на сервер github
+git push origin cicd
+nikita@89-108-115-185:~/NT_hometask_dj_5.6$ git pull origin cicd
+19. переходим на новую ветку
+nikita@89-108-115-185:~/NT_hometask_dj_5.6$ git checkout cicd
+20.создаем виртуальное окружение
+nikita@89-108-115-185:~/NT_hometask_dj_5.6$ python3 -m venv env
+21. активируем виртульное окружение
+nikita@89-108-115-185:~/NT_hometask_dj_5.6$ source env/bin/activate
+22. устанавливаем пакеты
+(env) nikita@89-108-115-185:~/NT_hometask_dj_5.6$ pip install -r requirements.txt
+23. в корне каталога создаем файл nano .env
+SECRET_KEY=django-insecure-nw^y+m^wmxza1asgk+)!ua2qx9)g+#v=6%76-9i8i(6eqiw94j
+DEBUG=True
+ALLOWED_HOSTS=151.248.123.137
+ENGINE=django.db.backends.postgresql
+NAME=netology_stocks_products
+HOST=localhost
+PORT=5432
+USER=nikita
+PASSWORD=nikita
+24. делаем миграции
+(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ python3 manage.py migrate
+25. запускаем сервер
+(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ python3 manage.py runserver 0.0.0.0:8002
+
+в браузере http://151.248.123.137:8002/api/v1/
+
+ПОДГОТОВКА ФАЙЛА GUNICORN
+1.Создаем файл в директории
+(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ sudo nano /etc/systemd/system/gunicorn.service
+2. Прописываем в файл (путь к файлам в виртуальной среде):
+[Unit]
+Description=Service for Gunicorn
+After=network.target
+
+[Service]
+User=nikita
+Group=www-data
+WorkingDirectory=/home/nikita/NT_hometask_dj_5.6
+ExecStart=/home/nikita/NT_hometask_dj_5.6/env/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/nikita/NT_hometask_dj_5.6/stocks_products/myproject.sock stocks_products.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
+
+3. Проверка 
+(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ sudo systemctl start gunicorn
+
+4. автозагрузка:
+(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ sudo systemctl enable gunicorn
+
+Настраиваем NGIX
+1.Запускаем
+(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ sudo systemctl start nginx
+2. прверяем, что в папке stoks_products появился файл myproject.sock
+(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ ls stocks_products/
+3.создаем файл project (лучше писать название проекта)
+(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ sudo nano /etc/nginx/sites-available/project
+4. Прописываем в файл
+server {
+        listen 80;
+        server_name 151.248.123.137;
+        location /static/ {
+                root /home/nikita/NT_hometask_dj_5.6;
+ }
+        location / {
+                include proxy_params;
+                proxy_pass http://unix:/home/nikita/NT_hometask_dj_5.6/stocks_products/myproject.sock;
+ }
+}
+
+
+5. Делаем ссылку - включаем сервер
+sudo ln -s /etc/nginx/sites-available/project /etc/nginx/sites-enabled
+
+6. Перезапускаем проект и проверяем статус nginx
+sudo systemctl restart nginx
+sudo systemctl status nginx
+
+
+7. Создаем файл для статики
+(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ python3 manage.py collectstatic
+
+
+ПРОВЕРКА ЛОГОВ
+sudo cat /var/log/nginx/error.log
+
+ДЛЯ ВНЕСЕНИЯ ИЗМЕНЕНИЙ В ПРОЕКТ ВРУЧНУЮ:
+1.Скачиваем обновления из github с ветки cicd
+
+git pull origin cicd
+
+2. Перезапуск приложений
+sudo systemctl restart gunicorn
+
+
+НАСТРОЙКА CI/CD (github action)
+
+1. в корне проекта на жестком диске создаем файл с расширением yml в папке
+.github/workflows/ci.yml
+
+2. заполняем ssh файл на сервере в папке проекта
+sudo nano pull.sh
+
+#!/bin/bash
+cd /home/nikita/NT_hometask_dj_5.6
+git pull origin cicd
+sudo systemctl restart gunicorn
+
+3. запускаем файл
+nikita@151-248-123-137:~/NT_hometask_dj_5.6$ bash pull.sh
+
+4. создаем файл pull.exp
+#!/bin/bash/expect
+spawn /home/nikita/NT_hometask_dj_5.6/pull.sh
+expect "password" 
+send -- "123456\r"
+
+5. Запускаем файл pull.exp
+expect pull.exp
+
+6. исправление ошибки couldn't execute "/home/nikita/NT_hometask_dj_5.6/pull.sh": permission denied
+    while executing
+chmod +x pull.sh
+
