@@ -12,63 +12,68 @@ root@80.78.241.219:~# su nikita
 6. Переходим в основную директорию
 nikita@80-78-241-219:/root$ cd ~
 7. скачиваем проект с github
-nnikita@80-78-241-219:~$ git clone https://github.com/Nikitaastapov/NT_hometask_dj_5.6.git
+nikita@80-78-241-219:~$ git clone https://github.com/Nikitaastapov/NT_hometask_6.3_CICD.git
 8.обновляем установщик
-nikita@89-108-115-185:~$ sudo apt update
+nikita@80-78-241-219:~$ sudo apt update
 9. устанавливаем окружение, pip, postgress
-nikita@89-108-115-185:~$ sudo apt install python3-venv python3-pip postgresql
+nikita@80-78-241-219:~$ sudo apt install python3-venv python3-pip postgresql
 10.устанавливаем nginx
-nikita@89-108-115-185:~$ sudo apt install nginx
+nikita@80-78-241-219:~$ sudo apt install nginx
 11.устанавливаем expect
-nikita@89-108-115-185:~$ sudo apt install expect
+nikita@80-78-241-219:~$ sudo apt install expect
 12. Переходим на пользователя postgres (указан в базе данных)
-nikita@89-108-115-185:~$ sudo su postgres
+nikita@80-78-241-219:~$ sudo su postgres
 13. переходим на psql
-postgres@89-108-115-185:/home/nikita$ psql
+postgres@80-78-241-219:/home/nikita$  psql
 13.1 используем текущего пользователя
 postgres=# ALTER USER nikita WITH PASSWORD 'nikita';
+13.2 проверка пользователей
+\du
+13.3 создание пользователя
+CREATE ROLE nikita SUPERUSER LOGIN PASSWORD 'nikita';
 14. создаем БД crud
-postgres=# CREATE DATABASE netology_stocks_products;
+postgres=# CREATE DATABASE netology_smart_home;
 15. Возвращаемся к проекту:
 postgres=# \q
 postgres@89-108-115-185:/home/nikita$ exit
 exit
 nikita@89-108-115-185:~$ 
 16. переходим в папку проекта
-nikita@89-108-115-185:~$ cd NT_hometask_dj_5.6
+nikita@89-108-115-185:~$ cd NT_hometask_6.3_CICD
 17.создаем доп. ветку на git (необязатеьно)в проекте
 git checkout -b cicd
 18. отправляем изменения на сервер github
 git push origin cicd
 nikita@89-108-115-185:~/NT_hometask_dj_5.6$ git pull origin cicd
 19. переходим на новую ветку
-nikita@89-108-115-185:~/NT_hometask_dj_5.6$ git checkout cicd
+nikita@80-78-241-219:~/NT_hometask_dj_5.6$ git checkout cicd
 20.создаем виртуальное окружение
-nikita@89-108-115-185:~/NT_hometask_dj_5.6$ python3 -m venv env
+nikita@80-78-241-219:~/NT_hometask_dj_5.6$ python3 -m venv env
 21. активируем виртульное окружение
-nikita@89-108-115-185:~/NT_hometask_dj_5.6$ source env/bin/activate
+nikita@80-78-241-219:~/NT_hometask_dj_5.6$ source env/bin/activate
 22. устанавливаем пакеты
-(env) nikita@89-108-115-185:~/NT_hometask_dj_5.6$ pip install -r requirements.txt
+(env) nikita@80-78-241-219:~/NT_hometask_dj_5.6$ pip install -r requirements.txt
 23. в корне каталога создаем файл nano .env
-SECRET_KEY=django-insecure-nw^y+m^wmxza1asgk+)!ua2qx9)g+#v=6%76-9i8i(6eqiw94j
+SECRET_KEY=django-insecure-9m2%u2yq=+#)6c#^j7^1p+@mpiob-r)9ki+zrv%*ad779fz89l
 DEBUG=True
-ALLOWED_HOSTS=151.248.123.137
-ENGINE=django.db.backends.postgresql
-NAME=netology_stocks_products
-HOST=localhost
-PORT=5432
-USER=nikita
-PASSWORD=nikita
-24. делаем миграции
-(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ python3 manage.py migrate
-25. запускаем сервер
-(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ python3 manage.py runserver 0.0.0.0:8002
+ALLOWED_HOSTS=80.78.241.219, 127.0.0.1
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=netology_smart_home
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=nikita
+DB_PASSWORD=nikita
 
-в браузере http://151.248.123.137:8002/api/v1/
+24. делаем миграции
+(env) nikita@80-78-241-219:~/NT_hometask_6.3_CICD$ python3 manage.py migrate
+25. запускаем сервер
+(env) nikita@80-78-241-219:~/NT_hometask_6.3_CICD$ python3 manage.py runserver 0.0.0.0:8002
+
+в браузере http://80.78.241.219:8002/api/test
 
 ПОДГОТОВКА ФАЙЛА GUNICORN
 1.Создаем файл в директории
-(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ sudo nano /etc/systemd/system/gunicorn.service
+(env) nikita@80-78-241-219:~/NT_hometask_6.3_CICD$ sudo nano /etc/systemd/system/gunicorn.service
 2. Прописываем в файл (путь к файлам в виртуальной среде):
 [Unit]
 Description=Service for Gunicorn
@@ -77,25 +82,28 @@ After=network.target
 [Service]
 User=nikita
 Group=www-data
-WorkingDirectory=/home/nikita/NT_hometask_dj_5.6
-ExecStart=/home/nikita/NT_hometask_dj_5.6/env/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/nikita/NT_hometask_dj_5.6/stocks_products/myproject.sock stocks_products.wsgi:application
+WorkingDirectory=/home/nikita/NT_hometask_6.3_CICD
+ExecStart=/home/nikita/NT_hometask_6.3_CICD/env/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/nikita/NT_hometask_6.3_CICD/smart_home/myproject.sock smart_home.wsgi:application
 
 [Install]
 WantedBy=multi-user.target
 
 3. Проверка 
-(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ sudo systemctl start gunicorn
+(env) nikita@80-78-241-219:~/NT_hometask_6.3_CICD$ sudo systemctl start gunicorn
 
 4. автозагрузка:
-(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ sudo systemctl enable gunicorn
+(env) nikita@80-78-241-219:~/NT_hometask_6.3_CICD$ sudo systemctl enable gunicorn
+
+5. проверка
+sudo systemctl status gunicorn
 
 Настраиваем NGIX
 1.Запускаем
-(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ sudo systemctl start nginx
+(env) nikita@80-78-241-219:~/NT_hometask_6.3_CICD$ sudo systemctl start nginx
 2. прверяем, что в папке stoks_products появился файл myproject.sock
-(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ ls stocks_products/
+(env) nikita@80-78-241-219:~/NT_hometask_6.3_CICD$ ls smart_home/
 3.создаем файл project (лучше писать название проекта)
-(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ sudo nano /etc/nginx/sites-available/project
+(env) nikita@80-78-241-219:~/NT_hometask_6.3_CICD$ sudo nano /etc/nginx/sites-available/project
 4. Прописываем в файл
 server {
         listen 80;

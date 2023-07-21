@@ -1,0 +1,68 @@
+name: Тестирование и развертываение проекта
+
+on:
+    push:
+        branches: [ master ]
+        
+jobs:
+    tests:
+        runs-on: ubuntu-20.04
+        env:
+            SECRET_KEY: ${{ secrets.SECRET_KEY }}
+            DEBUG: "0"
+            ENGINE: ${{ secrets.DB_ENGINE }}
+            NAME: ${{ secrets.DB_NAME }}
+            HOST: ${{ secrets.DB_HOST }}
+            PORT: ${{ secrets.DB_PORT }}
+            USER: ${{ secrets.DB_USER }}
+            PASSWORD: ${{ secrets.DB_PASSWORD }}
+        services:
+            postgres_main:
+                image: postgres:12
+                env: 
+                #берем данные из env выше
+                    POSTGRES_DB: ${{ env.NAME }}
+                    POSTGRES_USER: ${{ env.USER }}
+                    POSTGRES_PASSWORD: ${{ env.PASSWORD }}
+                ports:
+                    - 5432:5432
+                options:
+                    --health-cmd pg_isready
+                    --health-interval 5s
+                    --health-timeout 5s
+                    --health-retries 5
+        steps:
+            - name: Проверяем репозиторий на наличие изменений
+              uses: actions/checkout@v3
+            
+            - name: Установка Python и развертываение окружения
+              uses: actions/setup-python@v3
+              with:
+                python-version: 3.9
+                
+            - name: Установка зависимостей
+              run: pip install -r requirements.txt
+            
+            - name: Линтинг
+              run: flake8
+            
+            - name: Тесты
+              run: pytest
+              env:
+                SECRET_KEY: ${{ env.SECRET_KEY }}
+                DEBUG: ${{ env.DEBUG }}
+                ENGINE: ${{ env.ENGINE }}
+                NAME: ${{ env.NAME }}
+                HOST: ${{ env.HOST }}
+                PORT: ${{ env.PORT }}
+                USER: ${{ env.USER }}
+                PASSWORD: ${{ env.PASSWORD }}
+            
+            - name: Развертываение проекта
+              uses: appleboy/ssh-action@master
+              with:
+                  host: '80.78.241.219'
+                  username: 'nikita'
+                  password: 'nikita'
+                  script: expect /home/nikita/NT_hometask_6.3_CICD/pull.exp
+            
