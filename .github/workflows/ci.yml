@@ -59,6 +59,7 @@ jobs:
                 PORT: ${{ env.PORT }}
                 USER: ${{ env.USER }}
                 PASSWORD: ${{ env.PASSWORD }}
+                DJANGO_SETTINGS_MODULE: smart_home.settings
             
             - name: Развертываение проекта
               uses: appleboy/ssh-action@master

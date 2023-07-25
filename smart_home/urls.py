@@ -23,5 +23,5 @@ urlpatterns = [
     # path('api/sensors/', SensorCreateView.as_view())
     # подключаем маршруты из приложения measurement
     path('api/', include('measurement.urls')),
-    path('api/test', TestView.as_view()),
+    path('api/test/', TestView.as_view()),
 ]

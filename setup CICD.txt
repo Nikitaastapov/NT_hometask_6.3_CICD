@@ -102,24 +102,24 @@ sudo systemctl status gunicorn
 (env) nikita@80-78-241-219:~/NT_hometask_6.3_CICD$ sudo systemctl start nginx
 2. прверяем, что в папке stoks_products появился файл myproject.sock
 (env) nikita@80-78-241-219:~/NT_hometask_6.3_CICD$ ls smart_home/
-3.создаем файл project (лучше писать название проекта)
-(env) nikita@80-78-241-219:~/NT_hometask_6.3_CICD$ sudo nano /etc/nginx/sites-available/project
+3.создаем файл smart_home (лучше писать название проекта)
+(env) nikita@80-78-241-219:~/NT_hometask_6.3_CICD$ sudo nano /etc/nginx/sites-available/smart_home
 4. Прописываем в файл
 server {
         listen 80;
-        server_name 151.248.123.137;
+        server_name 80.78.241.219;
         location /static/ {
-                root /home/nikita/NT_hometask_dj_5.6;
+                root /home/nikita/NT_hometask_6.3_CICD;
  }
         location / {
                 include proxy_params;
-                proxy_pass http://unix:/home/nikita/NT_hometask_dj_5.6/stocks_products/myproject.sock;
+                proxy_pass http://unix:/home/nikita/NT_hometask_6.3_CICD/smart_home/myproject.sock;
  }
 }
 
 
 5. Делаем ссылку - включаем сервер
-sudo ln -s /etc/nginx/sites-available/project /etc/nginx/sites-enabled
+sudo ln -s /etc/nginx/sites-available/smart_home /etc/nginx/sites-enabled
 
 6. Перезапускаем проект и проверяем статус nginx
 sudo systemctl restart nginx
@@ -127,7 +127,7 @@ sudo systemctl status nginx
 
 
 7. Создаем файл для статики
-(env) nikita@151-248-123-137:~/NT_hometask_dj_5.6$ python3 manage.py collectstatic
+(env) nikita@80-78-241-219:~/NT_hometask_6.3_CICD$ python3 manage.py collectstatic
 
 
 ПРОВЕРКА ЛОГОВ
@@ -151,23 +151,25 @@ sudo systemctl restart gunicorn
 sudo nano pull.sh
 
 #!/bin/bash
-cd /home/nikita/NT_hometask_dj_5.6
-git pull origin cicd
+cd /home/nikita/NT_hometask_6.3_CICD
+git pull origin master
 sudo systemctl restart gunicorn
 
 3. запускаем файл
-nikita@151-248-123-137:~/NT_hometask_dj_5.6$ bash pull.sh
+nikita@151-248-123-137:~/NT_hometask_6.3_CICD$ bash pull.sh
 
 4. создаем файл pull.exp
+sudo nano pull.exp
+
 #!/bin/bash/expect
-spawn /home/nikita/NT_hometask_dj_5.6/pull.sh
+spawn /home/nikita/NT_hometask_6.3_CICD/pull.sh
 expect "password" 
-send -- "123456\r"
+send -- "nikita\r"
 
 5. Запускаем файл pull.exp
 expect pull.exp
 
 6. исправление ошибки couldn't execute "/home/nikita/NT_hometask_dj_5.6/pull.sh": permission denied
     while executing
-chmod +x pull.sh
+sudo chmod +x pull.sh
 

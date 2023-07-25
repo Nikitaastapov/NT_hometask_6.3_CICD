@@ -31,4 +31,4 @@ class MeasurementCreateView(ListCreateAPIView):
 
 class TestView(APIView):
     def get(self, request):
-        return Response('Test operation')
+        return Response('Test')
