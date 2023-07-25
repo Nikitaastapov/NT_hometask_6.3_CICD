@@ -9,6 +9,7 @@ jobs:
         runs-on: ubuntu-20.04
         env:
             SECRET_KEY: ${{ secrets.SECRET_KEY }}
+            ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
             DEBUG: "0"
             ENGINE: ${{ secrets.DB_ENGINE }}
             NAME: ${{ secrets.DB_NAME }}
@@ -52,6 +53,7 @@ jobs:
                 pytest
               env:
                 SECRET_KEY: ${{ env.SECRET_KEY }}
+                ALLOWED_HOSTS: ${{ env.ALLOWED_HOSTS }}
                 DEBUG: ${{ env.DEBUG }}
                 ENGINE: ${{ env.ENGINE }}
                 NAME: ${{ env.NAME }}
