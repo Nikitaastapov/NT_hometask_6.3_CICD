@@ -4,7 +4,7 @@ from rest_framework.test import APIClient
 # def test_example():
 #     assert False, "Just test example"
 
-url = '/api/test'
+url = '/api/test/'
 
 
 @pytest.fixture
