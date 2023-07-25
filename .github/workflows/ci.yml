@@ -66,7 +66,7 @@ jobs:
             - name: Развертываение проекта
               uses: appleboy/ssh-action@master
               with:
-                  host: '95.163.235.163
+                  host: '95.163.235.163'
                   username: 'nikita'
                   password: 'nikita'
                   script: expect /home/nikita/NT_hometask_6.3_CICD/pull.exp
