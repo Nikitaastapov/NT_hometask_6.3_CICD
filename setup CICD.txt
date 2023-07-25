@@ -1,9 +1,10 @@
 Настройка сервера
 
 1. подключаемся
-ssh root@80.78.241.219
+ssh root@95.163.235.163
 2. создаем пользователя
-root@80.78.241.219:~# adduser nikita
+root@95-163-235-163:~# adduser nikita
+nikita
 3. задаем пароль и заполняем инфо
 4. Назначаем пользователя идмином
 root@80.78.241.219:~# usermod nikita -aG sudo
@@ -56,7 +57,7 @@ nikita@80-78-241-219:~/NT_hometask_dj_5.6$ source env/bin/activate
 23. в корне каталога создаем файл nano .env
 SECRET_KEY=django-insecure-9m2%u2yq=+#)6c#^j7^1p+@mpiob-r)9ki+zrv%*ad779fz89l
 DEBUG=True
-ALLOWED_HOSTS=80.78.241.219, 127.0.0.1
+ALLOWED_HOSTS=95.163.235.163, 127.0.0.1
 DB_ENGINE=django.db.backends.postgresql
 DB_NAME=netology_smart_home
 DB_HOST=localhost
@@ -69,7 +70,7 @@ DB_PASSWORD=nikita
 25. запускаем сервер
 (env) nikita@80-78-241-219:~/NT_hometask_6.3_CICD$ python3 manage.py runserver 0.0.0.0:8002
 
-в браузере http://80.78.241.219:8002/api/test
+в браузере http://95.163.235.163:8002/api/test/
 
 ПОДГОТОВКА ФАЙЛА GUNICORN
 1.Создаем файл в директории
@@ -107,7 +108,7 @@ sudo systemctl status gunicorn
 4. Прописываем в файл
 server {
         listen 80;
-        server_name 80.78.241.219;
+        server_name 95.163.235.163;
         location /static/ {
                 root /home/nikita/NT_hometask_6.3_CICD;
  }
