@@ -135,9 +135,9 @@ sudo systemctl status nginx
 sudo cat /var/log/nginx/error.log
 
 ДЛЯ ВНЕСЕНИЯ ИЗМЕНЕНИЙ В ПРОЕКТ ВРУЧНУЮ:
-1.Скачиваем обновления из github с ветки cicd
+1.Скачиваем обновления из github с ветки master
 
-git pull origin cicd
+git pull origin master
 
 2. Перезапуск приложений
 sudo systemctl restart gunicorn
