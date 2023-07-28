@@ -16,5 +16,5 @@ def client():
 def test_get_response(client):
     response = client.get(url)
     data = response.json()
-    assert data == 'Test information'
+    assert data == 'Test_3'
     assert response.status_code == 200

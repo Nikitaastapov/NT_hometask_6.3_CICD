@@ -166,6 +166,7 @@ sudo nano pull.exp
 spawn /home/nikita/NT_hometask_6.3_CICD/pull.sh
 expect "password" 
 send -- "nikita\r"
+expect eof
 
 5. Запускаем файл pull.exp
 expect pull.exp
